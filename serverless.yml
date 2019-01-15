@@ -1,0 +1,52 @@
+################################################################################
+#
+################################################################################
+service: dpnt-infra-events
+
+provider:
+  name: aws
+  runtime: java8
+  stage: ${opt:stage, 'local'}
+  region: eu-west-2
+
+  memorySize: 1536 # in MB
+  timeout: 300 # in seconds
+  versionFunctions: false
+  environment: ${file(config/env.${self:provider.stage}.yml)}
+
+  iamRoleStatements:
+
+    # List SRCS bucket
+    - Effect: "Allow"
+      Action:
+       - "s3:ListBucket"
+       - "s3:ListBucketMultipartUploads"
+      Resource:
+       - ${self:provider.environment.S3_BUCKET_ARN}
+
+    # Read SRCS bucket
+    - Effect: "Allow"
+      Action:
+       - "s3:GetObject"
+      Resource:
+        Fn::Join:
+          - ""
+          - - ${self:provider.environment.S3_BUCKET_ARN}
+            - "/*"
+
+    # Publish events
+    - Effect: "Allow"
+      Action:
+       - "sqs:GetQueueAttributes"
+       - "sqs:SendMessageBatch"
+       - "sqs:SendMessage"
+      Resource:
+       - ${self:provider.environment.SQS_QUEUE_ARN}
+
+package:
+  artifact: build/libs/dpnt-infra-events-all.jar
+
+functions:
+  srcs-github-export:
+    handler: tdl.datapoint.sourcecode.SourceCodeUploadHandler
+    onError: arn:aws:sns:eu-west-2:577770582757:MyselfEU2
