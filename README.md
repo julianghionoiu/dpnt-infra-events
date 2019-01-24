@@ -21,6 +21,7 @@ Start external dependencies
 ```bash
 python local-sqs/elasticmq-wrapper.py start
 python local-s3/minio-wrapper.py start
+minio config host add myminio http://192.168.1.190:9000 local_test_access_key local_test_secret_key
 ```
 
 Run the acceptance test
@@ -33,8 +34,6 @@ Stop external dependencies
 ```bash
 python local-sqs/elasticmq-wrapper.py stop
 python local-s3/minio-wrapper.py stop
-minio config host add myminio http://192.168.1.190:9000 local_test_access_key local_test_secret_key
-
 ```
 
 ## Packaging

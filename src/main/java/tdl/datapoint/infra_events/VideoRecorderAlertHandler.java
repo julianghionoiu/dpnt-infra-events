@@ -11,7 +11,7 @@ import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tdl.datapoint.infra_events.processing.S3BucketEvent;
 import tdl.participant.queue.connector.SqsEventQueue;
-import tdl.participant.queue.events.SourceCodeUpdatedEvent;
+import tdl.participant.queue.events.VideoRecorderStartedEvent;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -23,8 +23,8 @@ import static tdl.datapoint.infra_events.ApplicationEnv.SQS_ENDPOINT;
 import static tdl.datapoint.infra_events.ApplicationEnv.SQS_QUEUE_URL;
 import static tdl.datapoint.infra_events.ApplicationEnv.SQS_REGION;
 
-public class SourceCodeUploadHandler implements RequestHandler<Map<String, Object>, String> {
-    private static final Logger LOG = Logger.getLogger(SourceCodeUploadHandler.class.getName());
+public class VideoRecorderAlertHandler implements RequestHandler<Map<String, Object>, String> {
+    private static final Logger LOG = Logger.getLogger(VideoRecorderAlertHandler.class.getName());
     private AmazonS3 s3Client;
     private SqsEventQueue participantEventQueue;
     private ObjectMapper jsonObjectMapper;
@@ -39,7 +39,7 @@ public class SourceCodeUploadHandler implements RequestHandler<Map<String, Objec
     }
 
     @SuppressWarnings("WeakerAccess")
-    public SourceCodeUploadHandler() {
+    public VideoRecorderAlertHandler() {
         s3Client = createS3Client(
                 getEnv(S3_ENDPOINT),
                 getEnv(S3_REGION));
@@ -84,12 +84,16 @@ public class SourceCodeUploadHandler implements RequestHandler<Map<String, Objec
     }
 
     private void handleS3Event(S3BucketEvent event) throws Exception {
-        LOG.info("Process S3 event with: "+event);
-        String participantId = event.getParticipantId();
+        LOG.info("Process S3 event with: " + event);
         String challengeId = event.getChallengeId();
+        String participantId = event.getParticipantId();
 
-        participantEventQueue.send(new SourceCodeUpdatedEvent(System.currentTimeMillis(),
-                        participantId, challengeId, "http://some url in http format"));
+        participantEventQueue.send(new VideoRecorderStartedEvent(System.currentTimeMillis(),
+                        participantId, challengeId, createVideoFileUrl(challengeId, participantId)));
+    }
+
+    private String createVideoFileUrl(String challengeId, String participantId){
+        return "file:///" + challengeId + "-" + participantId;
     }
 
 }
