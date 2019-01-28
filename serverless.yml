@@ -48,5 +48,5 @@ package:
 
 functions:
   srcs-github-export:
-    handler: tdl.datapoint.infra_events.VideoRecorderAlertHandler
+    handler: tdl.datapoint.infra_events.EventsAlertHandler
     onError: arn:aws:sns:eu-west-2:577770582757:MyselfEU2

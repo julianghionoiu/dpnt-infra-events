@@ -7,7 +7,7 @@ public class S3Event {
     private final String bucket;
     private final String key;
 
-    S3Event(String bucket, String key) {
+    public S3Event(String bucket, String key) {
         this.bucket = bucket;
         this.key = key;
     }

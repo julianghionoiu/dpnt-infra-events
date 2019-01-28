@@ -11,7 +11,7 @@ import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tdl.datapoint.infra_events.processing.S3BucketEvent;
 import tdl.participant.queue.connector.SqsEventQueue;
-import tdl.participant.queue.events.VideoRecorderStartedEvent;
+import tdl.participant.queue.events.RecorderStartedEvent;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -23,8 +23,8 @@ import static tdl.datapoint.infra_events.ApplicationEnv.SQS_ENDPOINT;
 import static tdl.datapoint.infra_events.ApplicationEnv.SQS_QUEUE_URL;
 import static tdl.datapoint.infra_events.ApplicationEnv.SQS_REGION;
 
-public class VideoRecorderAlertHandler implements RequestHandler<Map<String, Object>, String> {
-    private static final Logger LOG = Logger.getLogger(VideoRecorderAlertHandler.class.getName());
+public class EventsAlertHandler implements RequestHandler<Map<String, Object>, String> {
+    private static final Logger LOG = Logger.getLogger(EventsAlertHandler.class.getName());
     private AmazonS3 s3Client;
     private SqsEventQueue participantEventQueue;
     private ObjectMapper jsonObjectMapper;
@@ -39,7 +39,7 @@ public class VideoRecorderAlertHandler implements RequestHandler<Map<String, Obj
     }
 
     @SuppressWarnings("WeakerAccess")
-    public VideoRecorderAlertHandler() {
+    public EventsAlertHandler() {
         s3Client = createS3Client(
                 getEnv(S3_ENDPOINT),
                 getEnv(S3_REGION));
@@ -73,9 +73,9 @@ public class VideoRecorderAlertHandler implements RequestHandler<Map<String, Obj
     }
 
     @Override
-    public String handleRequest(Map<String, Object> s3EventMap, Context context) {
+    public String handleRequest(Map<String, Object> eventMap, Context context) {
         try {
-            handleS3Event(S3BucketEvent.from(s3EventMap, jsonObjectMapper));
+            handleS3Event(S3BucketEvent.from(eventMap, jsonObjectMapper));
             return "OK";
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getMessage(), ex);
@@ -88,12 +88,7 @@ public class VideoRecorderAlertHandler implements RequestHandler<Map<String, Obj
         String challengeId = event.getChallengeId();
         String participantId = event.getParticipantId();
 
-        participantEventQueue.send(new VideoRecorderStartedEvent(System.currentTimeMillis(),
-                        participantId, challengeId, createVideoFileUrl(challengeId, participantId)));
+        participantEventQueue.send(new RecorderStartedEvent(System.currentTimeMillis(),
+                        participantId, challengeId));
     }
-
-    private String createVideoFileUrl(String challengeId, String participantId){
-        return "file:///" + challengeId + "-" + participantId;
-    }
-
 }
