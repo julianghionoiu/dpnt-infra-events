@@ -31,11 +31,12 @@ import java.util.stream.Collectors;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
 
-
-public class RecordingsDatapointAcceptanceTest {
+public class AWSEventsDatapointAcceptanceTest {
     private static final Context NO_CONTEXT = null;
     private static final String RECORDER_STARTED_EVENT = "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"eu-west-2\",\"eventTime\":\"2019-01-11T21:07:25.954Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:577770582757:tdl-live-mani_0110_01\"},\"requestParameters\":{\"sourceIPAddress\":\"91.110.160.204\"},\"responseElements\":{\"x-amz-request-id\":\"E996F81A6364D452\",\"x-amz-id-2\":\"LqI4jhOSDsCnIL/gW/pAFmAkhJbH2WJ+Kc6e16IwhgWorJwPavdfh60AUoNnksSSFMtxmtTV5j8=\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"RecordingStarted\",\"bucket\":{\"name\":\"tdl-official-videos\",\"ownerIdentity\":{\"principalId\":\"A39KNTXUHOPHA4\"},\"arn\":\"arn:aws:s3:::tdl-official-videos\"},\"object\":{\"key\":\"HLO/mani_0110_01/last_sync_start.txt\",\"size\":24,\"eTag\":\"7065d91c3b36e89dfa23c6e7ce83af1a\",\"sequencer\":\"005C39058DE5F72FEF\"}}}]}";
+    private static final String UNSUPPORTED_EVENT = "{\"Records\":[{Unsupported event body}]";
 
     @Rule
     public EnvironmentVariables environmentVariables = new EnvironmentVariables();
@@ -92,7 +93,7 @@ public class RecordingsDatapointAcceptanceTest {
     }
 
     @Test
-    public void start_recorder() throws Exception {
+    public void start_recorder_and_events_should_flow_through_the_sqs_server() throws Exception {
         // Given - The participant produces Video or Source files while solving a challenge
         String challengeId = generateId();
         String participantId = generateId();
@@ -103,12 +104,33 @@ public class RecordingsDatapointAcceptanceTest {
                 convertToMap(wrapAsSNSEvent(s3PutEvent)),
                 NO_CONTEXT);
 
-        // Then - Repo is created with the contents of the Video or SRCS file
+        // Then - Object hits the S3 bucket triggering the S3 put event
         waitForQueueToReceiveEvents();
         RecorderStartedEvent queueEvent = recorderStartedEvents.pop();
         String eventString = queueEvent.toString();  // eventually might be a idea to verify the event sent getEventAsJsonString();
         assertThat(eventString, allOf(containsString(participantId),
                 containsString(challengeId)));
+    }
+
+    @Test
+    public void start_something_unsupported_no_event_should_flow_through_the_sqs_server() throws Exception {
+        // Given - The participant does some other activity while solving a challenge
+        String challengeId = generateId();
+        String participantId = generateId();
+
+        // When - Some event happens - not a known event to the this system
+        S3Event unsupportedEvent = new S3Event(UNSUPPORTED_EVENT, challengeId, participantId);
+        eventsAlertHandler.handleRequest(
+                convertToMap(wrapAsSNSEvent(unsupportedEvent)),
+                NO_CONTEXT);
+
+        // Then - some event happens which is not tracked
+        waitForQueueToReceiveEvents();
+        assertThat(
+                "No event should have sent to the SQS queue",
+                recorderStartedEvents.size(),
+                equalTo(0)
+        );
     }
 
     private String wrapAsSNSEvent(S3Event s3Event) throws JsonProcessingException {
