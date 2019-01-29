@@ -4,8 +4,6 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,19 +11,19 @@ import tdl.datapoint.infra_events.processing.S3BucketEvent;
 import tdl.participant.queue.connector.SqsEventQueue;
 import tdl.participant.queue.events.RecorderStartedEvent;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static tdl.datapoint.infra_events.ApplicationEnv.S3_ENDPOINT;
-import static tdl.datapoint.infra_events.ApplicationEnv.S3_REGION;
 import static tdl.datapoint.infra_events.ApplicationEnv.SQS_ENDPOINT;
 import static tdl.datapoint.infra_events.ApplicationEnv.SQS_QUEUE_URL;
 import static tdl.datapoint.infra_events.ApplicationEnv.SQS_REGION;
 
 public class EventsAlertHandler implements RequestHandler<Map<String, Object>, String> {
     private static final Logger LOG = Logger.getLogger(EventsAlertHandler.class.getName());
-    private AmazonS3 s3Client;
+
     private SqsEventQueue participantEventQueue;
     private ObjectMapper jsonObjectMapper;
 
@@ -40,10 +38,6 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
 
     @SuppressWarnings("WeakerAccess")
     public EventsAlertHandler() {
-        s3Client = createS3Client(
-                getEnv(S3_ENDPOINT),
-                getEnv(S3_REGION));
-
         AmazonSQS client = createSQSClient(
                 getEnv(SQS_ENDPOINT),
                 getEnv(SQS_REGION)
@@ -53,14 +47,6 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
         participantEventQueue = new SqsEventQueue(client, queueUrl);
 
         jsonObjectMapper = new ObjectMapper();
-    }
-
-    private static AmazonS3 createS3Client(String endpoint, String region) {
-        AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard();
-        builder = builder.withPathStyleAccessEnabled(true)
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
-                .withCredentials(new DefaultAWSCredentialsProviderChain());
-        return builder.build();
     }
 
     private static AmazonSQS createSQSClient(String serviceEndpoint, String signingRegion) {
@@ -73,14 +59,35 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
     }
 
     @Override
-    public String handleRequest(Map<String, Object> eventMap, Context context) {
+    public String handleRequest(Map<String, Object> inEventMap, Context context) {
         try {
-            handleS3Event(S3BucketEvent.from(eventMap, jsonObjectMapper));
-            return "OK";
+            if (containsEvent("aws:s3", inEventMap)) {
+                handleS3Event(S3BucketEvent.from(inEventMap, jsonObjectMapper));
+                return "OK";
+            }
+            return "";
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getMessage(), ex);
             throw new RuntimeException(ex);
         }
+    }
+
+    private boolean containsEvent(String eventType, Map<String, Object> eventMap) {
+        return getMessageStringFrom(eventMap).contains(eventType);
+    }
+
+    private String getMessageStringFrom(Map<String, Object> eventMap) {
+        List<LinkedHashMap> records = (List<LinkedHashMap>) eventMap.get("Records");
+        if (records != null) {
+            LinkedHashMap firstRecord = records.get(0);
+            if (firstRecord != null) {
+                LinkedHashMap snsObject = (LinkedHashMap) firstRecord.get("Sns");
+
+            return (String) snsObject.get("Message");
+            }
+        }
+
+        return "";
     }
 
     private void handleS3Event(S3BucketEvent event) throws Exception {
