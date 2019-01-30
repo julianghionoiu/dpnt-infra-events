@@ -65,7 +65,9 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
                 handleS3Event(S3BucketEvent.from(inEventMap, jsonObjectMapper));
                 return "OK";
             }
-            return "";
+            throw new RuntimeException(
+                    "An unidentified flying event has been detected, not letting it pass through " +
+                            "the portal. Alerting the mother-ship by raising this exception.");
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getMessage(), ex);
             throw new RuntimeException(ex);

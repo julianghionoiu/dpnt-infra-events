@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.fail;
 
 public class AWSEventsDatapointAcceptanceTest {
     private static final Context NO_CONTEXT = null;
@@ -120,17 +120,17 @@ public class AWSEventsDatapointAcceptanceTest {
 
         // When - Some event happens - not a known event to the this system
         S3Event unsupportedEvent = new S3Event(UNSUPPORTED_EVENT, challengeId, participantId);
-        eventsAlertHandler.handleRequest(
-                convertToMap(wrapAsSNSEvent(unsupportedEvent)),
-                NO_CONTEXT);
-
-        // Then - some event happens which is not tracked
-        waitForQueueToReceiveEvents();
-        assertThat(
-                "No event should have sent to the SQS queue",
-                recorderStartedEvents.size(),
-                equalTo(0)
-        );
+        try {
+            eventsAlertHandler.handleRequest(
+                    convertToMap(wrapAsSNSEvent(unsupportedEvent)),
+                    NO_CONTEXT);
+            fail("No event should have sent to the SQS queue");
+        } catch (Exception ex) {
+            // Then - some event happens which is not tracked
+            assertThat(ex.getMessage(),
+                    containsString("An unidentified flying event has been detected, not letting it pass " +
+                            "through the portal. Alerting the mother-ship by raising this exception."));
+        }
     }
 
     private String wrapAsSNSEvent(S3Event s3Event) throws JsonProcessingException {
