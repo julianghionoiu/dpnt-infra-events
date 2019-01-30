@@ -104,7 +104,7 @@ public class AWSEventsDatapointAcceptanceTest {
                 convertToMap(wrapAsSNSEvent(s3PutEvent)),
                 NO_CONTEXT);
 
-        // Then - Object hits the S3 bucket triggering the S3 put event
+        // Then - event is wrapped and sent to the SQS queue
         waitForQueueToReceiveEvents();
         RecorderStartedEvent queueEvent = recorderStartedEvents.pop();
         String eventString = queueEvent.toString();  // eventually might be a idea to verify the event sent getEventAsJsonString();

@@ -1,12 +1,11 @@
 # dpnt-infra-events
 
-Datapoint processing - infrastruction events
+AWS Events Datapoint processing - infrastructure events
 
 ### Updating sub-modules
 
-Root project contains three git submodules:
+Root project contains a single git submodule:
 
-- local-s3  
 - local-sqs 
 
 Run the below command in the project root to update the above submodules:
@@ -20,8 +19,6 @@ git submodule update --init
 Start external dependencies
 ```bash
 python local-sqs/elasticmq-wrapper.py start
-python local-s3/minio-wrapper.py start
-minio config host add myminio http://192.168.1.190:9000 local_test_access_key local_test_secret_key
 ```
 
 Run the acceptance test
@@ -33,7 +30,6 @@ Run the acceptance test
 Stop external dependencies
 ```bash
 python local-sqs/elasticmq-wrapper.py stop
-python local-s3/minio-wrapper.py stop
 ```
 
 ## Packaging
@@ -60,14 +56,6 @@ Ensure that the three components above i.e. `local-xxx` are running before runni
 Build package
 ```
 ./gradlew clean test shadowJar
-```
-
-Create a Minio bucket locally
-```
-export TEST_S3_LOCATION=./local-s3/.storage/tdl-test-auth/TCH/user01
-mkdir -p $TEST_S3_LOCATION
-cp src/test/resources/test1.srcs $TEST_S3_LOCATION
-echo $TEST_S3_LOCATION && ls -l $TEST_S3_LOCATION
 ```
 
 Create config file for respective env profiles:
@@ -121,7 +109,7 @@ serverless deploy --stage live
 
 ## Remote testing
 
-Create an S3 event json and place it in a temp folder, say `xyz/sample_some_event.json`
+Create an AWS event json and place it in a temp folder, say `xyz/sample_some_event.json`
 Set the bucket and the key to some meaningful values.
 
 Invoke the dev lambda
