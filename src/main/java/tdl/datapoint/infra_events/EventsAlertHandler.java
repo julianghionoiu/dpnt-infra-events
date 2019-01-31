@@ -7,9 +7,11 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import tdl.datapoint.infra_events.processing.ECSEvent;
 import tdl.datapoint.infra_events.processing.S3BucketEvent;
 import tdl.participant.queue.connector.SqsEventQueue;
 import tdl.participant.queue.events.RecorderStartedEvent;
+import tdl.participant.queue.events.VideoProcessingFailedEvent;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -65,6 +67,12 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
                 handleS3Event(S3BucketEvent.from(inEventMap, jsonObjectMapper));
                 return "OK";
             }
+
+            if (containsEvent("aws.ecs", inEventMap)) {
+                handleECSEvent(ECSEvent.from(inEventMap, jsonObjectMapper));
+                return "OK";
+            }
+
             throw new RuntimeException(
                     "An unidentified flying event has been detected, not letting it pass through " +
                             "the portal. Alerting the mother-ship by raising this exception.");
@@ -99,5 +107,14 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
 
         participantEventQueue.send(new RecorderStartedEvent(System.currentTimeMillis(),
                         participantId, challengeId));
+    }
+
+    private void handleECSEvent(ECSEvent event) throws Exception {
+        LOG.info("Process ECS event with: " + event);
+        String challengeId = event.getChallengeId();
+        String participantId = event.getParticipantId();
+
+        participantEventQueue.send(new VideoProcessingFailedEvent(System.currentTimeMillis(),
+                participantId, challengeId));
     }
 }
