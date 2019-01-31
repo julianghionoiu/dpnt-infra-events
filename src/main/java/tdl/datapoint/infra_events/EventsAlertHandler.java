@@ -13,6 +13,7 @@ import tdl.participant.queue.connector.SqsEventQueue;
 import tdl.participant.queue.events.RecorderStartedEvent;
 import tdl.participant.queue.events.VideoProcessingFailedEvent;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,12 +64,15 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
     @Override
     public String handleRequest(Map<String, Object> inEventMap, Context context) {
         try {
-            if (containsEvent("aws:s3", inEventMap)) {
+            if (containsEvent(Arrays.asList("aws:s3"), inEventMap)) {
                 handleS3Event(S3BucketEvent.from(inEventMap, jsonObjectMapper));
                 return "OK";
             }
 
-            if (containsEvent("aws.ecs", inEventMap)) {
+            if (containsEvent(
+                  Arrays.asList("aws.ecs", "pullStartedAt", "pullStoppedAt", "containerInstanceArn"),
+                  inEventMap)
+            ) {
                 handleECSEvent(ECSEvent.from(inEventMap, jsonObjectMapper));
                 return "OK";
             }
@@ -82,8 +86,13 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
         }
     }
 
-    private boolean containsEvent(String eventType, Map<String, Object> eventMap) {
-        return getMessageStringFrom(eventMap).contains(eventType);
+    private boolean containsEvent(List<String> eventAttributes, Map<String, Object> eventMap) {
+        for (String eachAttribute: eventAttributes) {
+            if (!getMessageStringFrom(eventMap).contains(eachAttribute)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private String getMessageStringFrom(Map<String, Object> eventMap) {
