@@ -145,6 +145,17 @@ serverless invoke local \
  --path src/test/resources/tdl/datapoint/infra_events/video_processing_failed_event.json
 ```
 
+_coverage-processing-failed_ event
+
+```
+AWS_ACCESS_KEY_ID=local_test_access_key \
+AWS_SECRET_KEY=local_test_secret_key \
+SLS_DEBUG=* \
+serverless invoke local \
+ --function ecs-coverage-processing-failed \
+ --path src/test/resources/tdl/datapoint/infra_events/coverage_processing_failed_event.json
+```
+
 ## Serverless successful execution: expected results
 
 On successful execution of your serverless function (lambda), you should see the below output:
@@ -170,6 +181,17 @@ _video-processing-failed_ event
 
 Jan 31, 2019 12:39:22 AM tdl.datapoint.infra_events.EventsAlertHandler handleECSEvent
 INFO: Process ECS event with: ECSEvent{eventJson='{"version":"0","id":"305f07f3-c812-e2a5-e7fa-626f6ac46ce1","detail-type":"ECS Task State Change","source":"aws.ecs","account":"577770582757","time":"2018-09-02T16:14:16Z","region":"eu-west-1","resources":["arn:aws:ecs:eu-west-1:577770582757:task/817dcb71-de09-4b7c-af12-b73eb7699bff"],"detail":{"clusterArn":"arn:aws:ecs:eu-west-1:577770582757:cluster/dpnt-coverage-live","containerInstanceArn":"arn:aws:ecs:eu-west-1:577770582757:container-instance/c8291511-dfc2-4b19-b7cb-496b59a6becf","containers":[{"containerArn":"arn:aws:ecs:eu-west-1:577770582757:container/72c5f96c-6e65-4528-b42d-3cf3e52f74d8","exitCode":255,"lastStatus":"STOPPED","name":"default-container","taskArn":"arn:aws:ecs:eu-west-1:577770582757:task/817dcb71-de09-4b7c-af12-b73eb7699bff","networkInterfaces":[]}],"createdAt":"2018-09-02T16:11:26.191Z","launchType":"FARGATE","cpu":"1024","memory":"2048","desiredStatus":"STOPPED","group":"family:dpnt-coverage-live-nodejs","lastStatus":"STOPPED","overrides":{"containerOverrides":[{"environment":[{"name":"PARTICIPANT_ID","value":"hyks01"},{"name":"REPO","value":"s3://tdl-official-videos/CHK/hyks01/sourcecode_20180902T113408.srcs"},{"name":"CHALLENGE_ID","value":"CHK"},{"name":"ROUND_ID","value":"CHK_R2"},{"name":"TAG","value":"CHK_R2/done"}],"name":"default-container"}]},"connectivity":"CONNECTED","pullStartedAt":"2018-09-02T16:11:37.959Z","startedAt":"2018-09-02T16:12:57.959Z","stoppingAt":"2018-09-02T16:14:03.598Z","stoppedAt":"2018-09-02T16:14:16.312Z","pullStoppedAt":"2018-09-02T16:12:57.959Z","executionStoppedAt":"2018-09-02T16:14:03Z","stoppedReason":"Essential container in task exited","updatedAt":"2018-09-02T16:14:16.312Z","taskArn":"arn:aws:ecs:eu-west-1:577770582757:task/817dcb71-de09-4b7c-af12-b73eb7699bff","taskDefinitionArn":"arn:aws:ecs:eu-west-1:577770582757:task-definition/dpnt-coverage-live-nodejs:1","version":5}}', challengeId='141873a7aa854caa84aac3e98af72696', participantId='46ff08a1a9294fcd933d0c2c063c743d'}
+
+OK
+```
+
+_coverage-processing-failed_ event
+
+```
+<--- snipped ---> 
+
+Feb 01, 2019 12:53:09 AM tdl.datapoint.infra_events.EventsAlertHandler handleECSEvent
+INFO: Process ECS event with: ECSEvent{eventJson='{"version":"0","id":"30ca1d6a-80b8-ecf9-4cdc-3531554d407a","detail-type":"ECS Task State Change","source":"aws.ecs","account":"577770582757","time":"2018-11-25T13:48:32Z","region":"eu-west-1","resources":["arn:aws:ecs:eu-west-1:577770582757:task/48b872ca-a6d6-408c-ab78-c6a9161dc453"],"detail":{"clusterArn":"arn:aws:ecs:eu-west-1:577770582757:cluster/dpnt-coverage-live","containers":[{"containerArn":"arn:aws:ecs:eu-west-1:577770582757:container/2d73eb67-2216-4202-b008-27ebba56c1be","lastStatus":"STOPPED","name":"default-container","taskArn":"arn:aws:ecs:eu-west-1:577770582757:task/48b872ca-a6d6-408c-ab78-c6a9161dc453","networkInterfaces":[{"attachmentId":"573b2189-8867-4491-88c1-c2843ca7d68d","privateIpv4Address":"172.31.19.97"}]}],"createdAt":"2018-11-25T13:47:11.694Z","launchType":"FARGATE","cpu":"1024","memory":"2048","desiredStatus":"STOPPED","group":"family:dpnt-coverage-live-python","lastStatus":"STOPPED","overrides":{"containerOverrides":[{"environment":[{"name":"PARTICIPANT_ID","value":"moic01"},{"name":"REPO","value":"s3://tdl-official-videos/FIZ/moic01/sourcecode_20181125T115222.srcs"},{"name":"CHALLENGE_ID","value":"FIZ"},{"name":"ROUND_ID","value":"FIZ_R1"},{"name":"TAG","value":"FIZ_R1/done"}],"name":"default-container"}]},"attachments":[{"id":"573b2189-8867-4491-88c1-c2843ca7d68d","type":"eni","status":"DELETED","details":[{"name":"subnetId","value":"subnet-cf2386b9"},{"name":"networkInterfaceId","value":"eni-96fe1ea0"},{"name":"macAddress","value":"06:0f:fb:01:46:e8"},{"name":"privateIPv4Address","value":"172.31.19.97"}]}],"connectivity":"DISCONNECTED","stoppingAt":"2018-11-25T13:48:19.751Z","stoppedAt":"2018-11-25T13:48:32.586Z","executionStoppedAt":"2018-11-25T13:47:49Z","stoppedReason":"Task failed to start","updatedAt":"2018-11-25T13:48:32.586Z","taskArn":"arn:aws:ecs:eu-west-1:577770582757:task/48b872ca-a6d6-408c-ab78-c6a9161dc453","taskDefinitionArn":"arn:aws:ecs:eu-west-1:577770582757:task-definition/dpnt-coverage-live-python:1","version":5}}', challengeId='3a68fbc11e1c4d7b9dc8e58e63e3c0a9', participantId='ce3c9ed7c82040259c4f1e305d913e38'}
 
 OK
 ```

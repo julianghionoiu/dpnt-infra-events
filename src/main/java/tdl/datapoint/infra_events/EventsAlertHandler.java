@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import tdl.datapoint.infra_events.processing.ECSEvent;
 import tdl.datapoint.infra_events.processing.S3BucketEvent;
 import tdl.participant.queue.connector.SqsEventQueue;
+import tdl.participant.queue.events.CoverageProcessingFailedEvent;
 import tdl.participant.queue.events.RecorderStartedEvent;
 import tdl.participant.queue.events.VideoProcessingFailedEvent;
 
@@ -77,6 +78,13 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
                 return "OK";
             }
 
+            if (containsEvent(Arrays.asList("aws.ecs", "attachments"), inEventMap) &&
+                ! containsEvent(Arrays.asList("pullStartedAt", "pullStoppedAt", "containerInstanceArn"), inEventMap)
+            ) {
+                handleECSCoverageEvent(ECSEvent.from(inEventMap, jsonObjectMapper));
+                return "OK";
+            }
+
             throw new RuntimeException(
                     "An unidentified flying event has been detected, not letting it pass through " +
                             "the portal. Alerting the mother-ship by raising this exception.");
@@ -124,6 +132,15 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
         String participantId = event.getParticipantId();
 
         participantEventQueue.send(new VideoProcessingFailedEvent(System.currentTimeMillis(),
+                participantId, challengeId));
+    }
+
+    private void handleECSCoverageEvent(ECSEvent event) throws Exception {
+        LOG.info("Process ECS Coverage Processing Failure event with: " + event);
+        String challengeId = event.getChallengeId();
+        String participantId = event.getParticipantId();
+
+        participantEventQueue.send(new CoverageProcessingFailedEvent(System.currentTimeMillis(),
                 participantId, challengeId));
     }
 }

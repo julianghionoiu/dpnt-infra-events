@@ -54,3 +54,7 @@ functions:
   ecs-video-processing-failed:
     handler: tdl.datapoint.infra_events.EventsAlertHandler
     onError: arn:aws:sns:eu-west-2:577770582757:MyselfEU2
+
+  ecs-coverage-processing-failed:
+    handler: tdl.datapoint.infra_events.EventsAlertHandler
+    onError: arn:aws:sns:eu-west-2:577770582757:MyselfEU2
