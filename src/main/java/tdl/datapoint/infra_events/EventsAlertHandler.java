@@ -73,7 +73,7 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
                   Arrays.asList("aws.ecs", "pullStartedAt", "pullStoppedAt", "containerInstanceArn"),
                   inEventMap)
             ) {
-                handleECSEvent(ECSEvent.from(inEventMap, jsonObjectMapper));
+                handleECSVideoEvent(ECSEvent.from(inEventMap, jsonObjectMapper));
                 return "OK";
             }
 
@@ -118,8 +118,8 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
                         participantId, challengeId));
     }
 
-    private void handleECSEvent(ECSEvent event) throws Exception {
-        LOG.info("Process ECS event with: " + event);
+    private void handleECSVideoEvent(ECSEvent event) throws Exception {
+        LOG.info("Process ECS Video Processing Failure event with: " + event);
         String challengeId = event.getChallengeId();
         String participantId = event.getParticipantId();
 
