@@ -99,9 +99,14 @@ public class VideoProcessingFailedEventsAcceptanceTest {
         // Given - The participant has uploaded a video while solving a challenge
         String challengeId = generateId();
         String participantId = generateId();
+        String errorMessage = "Essential container in task exited" ;
 
         // When - Video processing fails in the container on the ECS
-        ECSEvent ecsEvent = new ECSEvent(ECS_VIDEO_PROCESSING_FAILED_EVENT, challengeId, participantId);
+        ECSEvent ecsEvent = new ECSEvent(
+                ECS_VIDEO_PROCESSING_FAILED_EVENT,
+                challengeId,
+                participantId,
+                errorMessage);
         eventsAlertHandler.handleRequest(
                 convertToMap(wrapAsSNSEvent(ecsEvent)),
                 NO_CONTEXT);
@@ -110,8 +115,11 @@ public class VideoProcessingFailedEventsAcceptanceTest {
         waitForQueueToReceiveEvents();
         VideoProcessingFailedEvent queueEvent = videoProcessingFailedEvents.pop();
         String eventString = queueEvent.toString();  // eventually might be a idea to verify the event sent getEventAsJsonString();
-        assertThat(eventString, allOf(containsString(participantId),
-                containsString(challengeId)));
+        assertThat(eventString,
+                allOf(containsString(participantId),
+                        containsString(challengeId),
+                        containsString(errorMessage))
+        );
     }
 
     @Test
@@ -119,9 +127,10 @@ public class VideoProcessingFailedEventsAcceptanceTest {
         // Given - The participant does some other activity while solving a challenge
         String challengeId = generateId();
         String participantId = generateId();
+        String errorMessage = "";
 
         // When - Some unsupported event happens, let's say it's an unsupported ECS event in this case
-        ECSEvent unsupportedECSEvent = new ECSEvent(UNSUPPORTED_ECS_EVENT, challengeId, participantId);
+        ECSEvent unsupportedECSEvent = new ECSEvent(UNSUPPORTED_ECS_EVENT, challengeId, participantId, errorMessage);
         try {
             eventsAlertHandler.handleRequest(
                     convertToMap(wrapAsSNSEvent(unsupportedECSEvent)),
