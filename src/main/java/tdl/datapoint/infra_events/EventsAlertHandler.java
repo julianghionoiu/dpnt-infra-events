@@ -8,7 +8,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tdl.datapoint.infra_events.processing.CoverageProcessingFailedECSEvent;
-import tdl.datapoint.infra_events.processing.ECSEvent;
+import tdl.datapoint.infra_events.processing.VideoProcessingFailedECSEvent;
 import tdl.datapoint.infra_events.processing.S3BucketEvent;
 import tdl.participant.queue.connector.SqsEventQueue;
 import tdl.participant.queue.events.CoverageProcessingFailedEvent;
@@ -75,7 +75,7 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
                   Arrays.asList("aws.ecs", "pullStartedAt", "pullStoppedAt", "containerInstanceArn"),
                   inEventMap)
             ) {
-                handleECSVideoEvent(ECSEvent.from(inEventMap, jsonObjectMapper));
+                handleECSVideoEvent(VideoProcessingFailedECSEvent.from(inEventMap, jsonObjectMapper));
                 return "OK";
             }
 
@@ -127,7 +127,7 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
                         participantId, challengeId));
     }
 
-    private void handleECSVideoEvent(ECSEvent event) throws Exception {
+    private void handleECSVideoEvent(VideoProcessingFailedECSEvent event) throws Exception {
         LOG.info("Process ECS Video Processing Failure event with: " + event);
         String challengeId = event.getChallengeId();
         String participantId = event.getParticipantId();

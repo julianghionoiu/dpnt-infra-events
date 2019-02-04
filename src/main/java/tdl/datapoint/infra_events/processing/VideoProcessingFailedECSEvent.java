@@ -7,14 +7,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class ECSEvent {
+public class VideoProcessingFailedECSEvent {
 
     private final String eventJson;
     private final String challengeId;
     private final String participantId;
     private final String errorMessage;
 
-    private ECSEvent(String eventJson, String challengeId, String participantId, String errorMessage) {
+    private VideoProcessingFailedECSEvent(String eventJson, String challengeId, String participantId, String errorMessage) {
         this.eventJson = eventJson;
         this.challengeId = challengeId;
         this.participantId = participantId;
@@ -22,8 +22,8 @@ public class ECSEvent {
     }
 
     @SuppressWarnings("unchecked")
-    public static ECSEvent from(Map<String, Object> request,
-                                ObjectMapper jsonObjectMapper) throws IOException {
+    public static VideoProcessingFailedECSEvent from(Map<String, Object> request,
+                                                     ObjectMapper jsonObjectMapper) throws IOException {
         if (request == null) {
             throw new IllegalArgumentException("No input provided");
         }
@@ -40,7 +40,7 @@ public class ECSEvent {
         String challengeId = ecsObject.get("ecsevent").get("challengeId").asText();
         String participantId = ecsObject.get("ecsevent").get("participantId").asText();
         String errorMessage = ecsObject.get("ecsevent").get("errorMessage").asText();
-        return new ECSEvent(eventJson, challengeId, participantId, errorMessage);
+        return new VideoProcessingFailedECSEvent(eventJson, challengeId, participantId, errorMessage);
     }
 
     private static Object mapGet(Map<String, Object> map, String key) {
@@ -69,7 +69,7 @@ public class ECSEvent {
 
     @Override
     public String toString() {
-        return "ECSEvent{" +
+        return "VideoProcessingFailedECSEvent{" +
                 "eventJson='" + eventJson + '\'' +
                 ", challengeId='" + challengeId + '\'' +
                 ", participantId='" + participantId + '\'' +

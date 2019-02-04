@@ -3,16 +3,16 @@ package tdl.datapoint.infra_events.support;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class ECSEvent {
+public class VideoProcessingFailedECSEvent {
     private final String eventJson;
     private final String challengeId;
     private final String participantId;
     private final String errorMessage;
 
-    public ECSEvent(String eventJson,
-                    String challengeId,
-                    String participantId,
-                    String errorMessage) {
+    public VideoProcessingFailedECSEvent(String eventJson,
+                                         String challengeId,
+                                         String participantId,
+                                         String errorMessage) {
         this.eventJson = eventJson;
         this.challengeId = challengeId;
         this.participantId = participantId;
