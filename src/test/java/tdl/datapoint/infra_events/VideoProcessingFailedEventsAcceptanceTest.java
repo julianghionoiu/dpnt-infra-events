@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.yaml.snakeyaml.Yaml;
+import tdl.datapoint.infra_events.support.FailedECSEvent;
 import tdl.datapoint.infra_events.support.VideoProcessingFailedECSEvent;
 import tdl.datapoint.infra_events.support.LocalSQSQueue;
 import tdl.datapoint.infra_events.support.SNSEvent;
@@ -102,7 +103,7 @@ public class VideoProcessingFailedEventsAcceptanceTest {
         String errorMessage = "Essential container in task exited" ;
 
         // When - Video processing fails in the container on the ECS
-        VideoProcessingFailedECSEvent ecsEvent = new VideoProcessingFailedECSEvent(
+        FailedECSEvent ecsEvent = new VideoProcessingFailedECSEvent(
                 ECS_VIDEO_PROCESSING_FAILED_EVENT,
                 challengeId,
                 participantId,
@@ -131,7 +132,7 @@ public class VideoProcessingFailedEventsAcceptanceTest {
         String errorMessage = "";
 
         // When - Some unsupported event happens, let's say it's an unsupported ECS event in this case
-        VideoProcessingFailedECSEvent unsupportedECSEvent = new VideoProcessingFailedECSEvent(
+        FailedECSEvent unsupportedECSEvent = new VideoProcessingFailedECSEvent(
                 UNSUPPORTED_ECS_EVENT,
                 challengeId,
                 participantId,
@@ -150,7 +151,7 @@ public class VideoProcessingFailedEventsAcceptanceTest {
         }
     }
 
-    private String wrapAsSNSEvent(VideoProcessingFailedECSEvent ecsEvent) throws JsonProcessingException {
+    private String wrapAsSNSEvent(FailedECSEvent ecsEvent) throws JsonProcessingException {
         SNSEvent snsEvent = new SNSEvent(mapper.writeValueAsString(ecsEvent.asJsonNode()));
         return mapper.writeValueAsString(snsEvent.asJsonNode());
     }
