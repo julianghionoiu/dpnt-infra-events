@@ -117,7 +117,9 @@ public class CoverageFailedEventsAcceptanceTest {
         CoverageProcessingFailedEvent queueEvent = coverageProcessingFailedEvents.pop();
         String eventString = queueEvent.toString();  // eventually might be a idea to verify the event sent getEventAsJsonString();
         assertThat(eventString, allOf(containsString(roundId),
-                containsString(challengeId)));
+                containsString(challengeId),
+                containsString(errorMessage))
+        );
     }
 
     @Test

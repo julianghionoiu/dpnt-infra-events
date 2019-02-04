@@ -16,8 +16,8 @@ public class CoverageProcessingFailedECSEvent extends FailedECSEvent {
 
     public ObjectNode asJsonNode() {
         ObjectNode rootNode = super.asJsonNode();
-        JsonNode s3 = rootNode.get("Records").get(0).get("ecsevent");
-        ((ObjectNode)s3).put("roundId", roundId);
+        JsonNode ecsEvent = rootNode.get("Records").get(0).get("ecsevent");
+        ((ObjectNode)ecsEvent).put("roundId", roundId);
         return rootNode;
     }
 }

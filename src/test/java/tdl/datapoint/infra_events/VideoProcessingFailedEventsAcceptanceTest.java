@@ -106,7 +106,8 @@ public class VideoProcessingFailedEventsAcceptanceTest {
                 ECS_VIDEO_PROCESSING_FAILED_EVENT,
                 challengeId,
                 participantId,
-                errorMessage);
+                errorMessage
+        );
         eventsAlertHandler.handleRequest(
                 convertToMap(wrapAsSNSEvent(ecsEvent)),
                 NO_CONTEXT);
@@ -130,7 +131,12 @@ public class VideoProcessingFailedEventsAcceptanceTest {
         String errorMessage = "";
 
         // When - Some unsupported event happens, let's say it's an unsupported ECS event in this case
-        VideoProcessingFailedECSEvent unsupportedECSEvent = new VideoProcessingFailedECSEvent(UNSUPPORTED_ECS_EVENT, challengeId, participantId, errorMessage);
+        VideoProcessingFailedECSEvent unsupportedECSEvent = new VideoProcessingFailedECSEvent(
+                UNSUPPORTED_ECS_EVENT,
+                challengeId,
+                participantId,
+                errorMessage
+        );
         try {
             eventsAlertHandler.handleRequest(
                     convertToMap(wrapAsSNSEvent(unsupportedECSEvent)),
