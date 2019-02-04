@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.yaml.snakeyaml.Yaml;
-import tdl.datapoint.infra_events.support.ECSEvent;
+import tdl.datapoint.infra_events.support.CoverageProcessingFailedECSEvent;
 import tdl.datapoint.infra_events.support.LocalSQSQueue;
 import tdl.datapoint.infra_events.support.SNSEvent;
 import tdl.participant.queue.connector.EventProcessingException;
@@ -98,10 +98,16 @@ public class CoverageFailedEventsAcceptanceTest {
     public void when_coverage_processing_fails_in_a_container_an_event_should_flow_to_the_sqs_queue() throws Exception {
         // Given - The participant has commits and pushes code after solving a challenge
         String challengeId = generateId();
-        String participantId = generateId();
+        String roundId = generateId();
+        String errorMessage = "";
 
         // When - Coverage processing fails in the container on the ECS
-        ECSEvent ecsEvent = new ECSEvent(ECS_COVERAGE_FAILED_EVENT, challengeId, participantId);
+        CoverageProcessingFailedECSEvent ecsEvent = new CoverageProcessingFailedECSEvent(
+                ECS_COVERAGE_FAILED_EVENT,
+                roundId,
+                challengeId,
+                errorMessage
+        );
         eventsAlertHandler.handleRequest(
                 convertToMap(wrapAsSNSEvent(ecsEvent)),
                 NO_CONTEXT);
@@ -110,7 +116,7 @@ public class CoverageFailedEventsAcceptanceTest {
         waitForQueueToReceiveEvents();
         CoverageProcessingFailedEvent queueEvent = coverageProcessingFailedEvents.pop();
         String eventString = queueEvent.toString();  // eventually might be a idea to verify the event sent getEventAsJsonString();
-        assertThat(eventString, allOf(containsString(participantId),
+        assertThat(eventString, allOf(containsString(roundId),
                 containsString(challengeId)));
     }
 
@@ -118,10 +124,16 @@ public class CoverageFailedEventsAcceptanceTest {
     public void an_unsupported_ecs_event_should_not_flow_to_the_sqs_queue() {
         // Given - The participant does some other activity while solving a challenge
         String challengeId = generateId();
-        String participantId = generateId();
+        String roundId = generateId();
+        String errorMessage = "";
 
         // When - Some unsupported event happens, let's say it's an unsupported ECS event in this case
-        ECSEvent unsupportedECSEvent = new ECSEvent(UNSUPPORTED_ECS_EVENT, challengeId, participantId);
+        CoverageProcessingFailedECSEvent unsupportedECSEvent = new CoverageProcessingFailedECSEvent(
+                UNSUPPORTED_ECS_EVENT,
+                roundId,
+                challengeId,
+                errorMessage
+        );
         try {
             eventsAlertHandler.handleRequest(
                     convertToMap(wrapAsSNSEvent(unsupportedECSEvent)),
@@ -135,7 +147,7 @@ public class CoverageFailedEventsAcceptanceTest {
         }
     }
 
-    private String wrapAsSNSEvent(ECSEvent ecsEvent) throws JsonProcessingException {
+    private String wrapAsSNSEvent(CoverageProcessingFailedECSEvent ecsEvent) throws JsonProcessingException {
         SNSEvent snsEvent = new SNSEvent(mapper.writeValueAsString(ecsEvent.asJsonNode()));
         return mapper.writeValueAsString(snsEvent.asJsonNode());
     }

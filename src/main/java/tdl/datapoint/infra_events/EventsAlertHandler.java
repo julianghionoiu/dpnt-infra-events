@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import tdl.datapoint.infra_events.processing.CoverageProcessingFailedECSEvent;
 import tdl.datapoint.infra_events.processing.ECSEvent;
 import tdl.datapoint.infra_events.processing.S3BucketEvent;
 import tdl.participant.queue.connector.SqsEventQueue;
@@ -81,7 +82,7 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
             if (containsEvent(Arrays.asList("aws.ecs", "attachments"), inEventMap) &&
                 ! containsEvent(Arrays.asList("pullStartedAt", "pullStoppedAt", "containerInstanceArn"), inEventMap)
             ) {
-                handleECSCoverageEvent(ECSEvent.from(inEventMap, jsonObjectMapper));
+                handleECSCoverageEvent(CoverageProcessingFailedECSEvent.from(inEventMap, jsonObjectMapper));
                 return "OK";
             }
 
@@ -136,12 +137,13 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
                 participantId, challengeId, errorMessage));
     }
 
-    private void handleECSCoverageEvent(ECSEvent event) throws Exception {
+    private void handleECSCoverageEvent(CoverageProcessingFailedECSEvent event) throws Exception {
         LOG.info("Process ECS Coverage Processing Failure event with: " + event);
-        String challengeId = event.getChallengeId();
+        String roundId = event.getRoundId();
         String participantId = event.getParticipantId();
+        String errorMessage = event.getErrorMessage();
 
         participantEventQueue.send(new CoverageProcessingFailedEvent(System.currentTimeMillis(),
-                participantId, challengeId));
+                participantId, roundId, errorMessage));
     }
 }
