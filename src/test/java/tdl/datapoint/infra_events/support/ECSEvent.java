@@ -7,11 +7,16 @@ public class ECSEvent {
     private final String eventJson;
     private final String challengeId;
     private final String participantId;
+    private final String errorMessage;
 
-    public ECSEvent(String eventJson, String challengeId, String participantId) {
+    public ECSEvent(String eventJson,
+                    String challengeId,
+                    String participantId,
+                    String errorMessage) {
         this.eventJson = eventJson;
         this.challengeId = challengeId;
         this.participantId = participantId;
+        this.errorMessage = errorMessage;
     }
 
     public ObjectNode asJsonNode() {
@@ -22,7 +27,8 @@ public class ECSEvent {
         s3.putObject("ecsevent")
                 .put("eventJson", eventJson)
                 .put("challengeId", challengeId)
-                .put("participantId", participantId);
+                .put("participantId", participantId)
+                .put("errorMessage", errorMessage);
         return rootNode;
     }
 }

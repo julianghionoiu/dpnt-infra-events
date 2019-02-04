@@ -12,11 +12,13 @@ public class ECSEvent {
     private final String eventJson;
     private final String challengeId;
     private final String participantId;
+    private final String errorMessage;
 
-    private ECSEvent(String eventJson, String challengeId, String participantId) {
+    private ECSEvent(String eventJson, String challengeId, String participantId, String errorMessage) {
         this.eventJson = eventJson;
         this.challengeId = challengeId;
         this.participantId = participantId;
+        this.errorMessage = errorMessage;
     }
 
     @SuppressWarnings("unchecked")
@@ -37,7 +39,8 @@ public class ECSEvent {
         String eventJson = ecsObject.get("ecsevent").get("eventJson").asText();
         String challengeId = ecsObject.get("ecsevent").get("challengeId").asText();
         String participantId = ecsObject.get("ecsevent").get("participantId").asText();
-        return new ECSEvent(eventJson, challengeId, participantId);
+        String errorMessage = ecsObject.get("ecsevent").get("errorMessage").asText();
+        return new ECSEvent(eventJson, challengeId, participantId, errorMessage);
     }
 
     private static Object mapGet(Map<String, Object> map, String key) {
@@ -60,12 +63,17 @@ public class ECSEvent {
         return participantId;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
     @Override
     public String toString() {
         return "ECSEvent{" +
                 "eventJson='" + eventJson + '\'' +
                 ", challengeId='" + challengeId + '\'' +
                 ", participantId='" + participantId + '\'' +
+                ", errorMessage='" + errorMessage + '\'' +
                 '}';
     }
 }

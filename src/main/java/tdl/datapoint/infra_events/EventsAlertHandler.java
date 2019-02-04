@@ -122,8 +122,9 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
         LOG.info("Process ECS Video Processing Failure event with: " + event);
         String challengeId = event.getChallengeId();
         String participantId = event.getParticipantId();
+        String errorMessage = event.getErrorMessage();
 
         participantEventQueue.send(new VideoProcessingFailedEvent(System.currentTimeMillis(),
-                participantId, challengeId));
+                participantId, challengeId, errorMessage));
     }
 }
