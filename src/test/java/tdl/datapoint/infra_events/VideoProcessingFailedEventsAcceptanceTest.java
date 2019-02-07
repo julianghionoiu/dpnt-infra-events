@@ -11,10 +11,9 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.yaml.snakeyaml.Yaml;
-import tdl.datapoint.infra_events.support.FailedECSEvent;
-import tdl.datapoint.infra_events.support.VideoProcessingFailedECSEvent;
 import tdl.datapoint.infra_events.support.LocalSQSQueue;
 import tdl.datapoint.infra_events.support.SNSEvent;
+import tdl.datapoint.infra_events.support.VideoProcessingFailedECSEvent;
 import tdl.participant.queue.connector.EventProcessingException;
 import tdl.participant.queue.connector.QueueEventHandlers;
 import tdl.participant.queue.connector.SqsEventQueue;
@@ -98,15 +97,15 @@ public class VideoProcessingFailedEventsAcceptanceTest {
     @Test
     public void when_video_processing_fails_in_a_container_an_event_should_flow_to_the_sqs_queue() throws Exception {
         // Given - The participant has uploaded a video while solving a challenge
-        String challengeId = generateId();
         String participantId = generateId();
+        String challengeId = generateId();
         String errorMessage = "Essential container in task exited" ;
 
         // When - Video processing fails in the container on the ECS
-        FailedECSEvent ecsEvent = new VideoProcessingFailedECSEvent(
+        VideoProcessingFailedECSEvent ecsEvent = new VideoProcessingFailedECSEvent(
                 ECS_VIDEO_PROCESSING_FAILED_EVENT,
-                challengeId,
                 participantId,
+                challengeId,
                 errorMessage
         );
         eventsAlertHandler.handleRequest(
@@ -127,15 +126,15 @@ public class VideoProcessingFailedEventsAcceptanceTest {
     @Test
     public void an_unsupported_ecs_event_should_not_flow_to_the_sqs_queue() {
         // Given - The participant does some other activity while solving a challenge
-        String challengeId = generateId();
         String participantId = generateId();
+        String challengeId = generateId();
         String errorMessage = "";
 
         // When - Some unsupported event happens, let's say it's an unsupported ECS event in this case
-        FailedECSEvent unsupportedECSEvent = new VideoProcessingFailedECSEvent(
+        VideoProcessingFailedECSEvent unsupportedECSEvent = new VideoProcessingFailedECSEvent(
                 UNSUPPORTED_ECS_EVENT,
-                challengeId,
                 participantId,
+                challengeId,
                 errorMessage
         );
         try {
@@ -151,7 +150,7 @@ public class VideoProcessingFailedEventsAcceptanceTest {
         }
     }
 
-    private String wrapAsSNSEvent(FailedECSEvent ecsEvent) throws JsonProcessingException {
+    private String wrapAsSNSEvent(VideoProcessingFailedECSEvent ecsEvent) throws JsonProcessingException {
         SNSEvent snsEvent = new SNSEvent(mapper.writeValueAsString(ecsEvent.asJsonNode()));
         return mapper.writeValueAsString(snsEvent.asJsonNode());
     }

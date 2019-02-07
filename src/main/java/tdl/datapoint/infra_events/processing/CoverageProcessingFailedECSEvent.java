@@ -11,8 +11,8 @@ public class CoverageProcessingFailedECSEvent extends FailedECSEvent {
     private final String roundId;
 
     private CoverageProcessingFailedECSEvent(String eventJson,
-                                             String roundId,
                                              String participantId,
+                                             String roundId,
                                              String errorMessage) {
         super(eventJson, participantId, errorMessage);
         this.roundId = roundId;
@@ -21,15 +21,18 @@ public class CoverageProcessingFailedECSEvent extends FailedECSEvent {
     @SuppressWarnings("unchecked")
     public static CoverageProcessingFailedECSEvent from(Map<String, Object> request,
                                                         ObjectMapper jsonObjectMapper) throws IOException {
-
-        FailedECSEvent failedECSEvent = FailedECSEvent.from(request, jsonObjectMapper);
         JsonNode ecsObject = getRecordsNode(request, jsonObjectMapper);
+
+        String eventJson = ecsObject.get("ecsevent").get("eventJson").asText();
+        String participantId = ecsObject.get("ecsevent").get("participantId").asText();
+        String errorMessage = ecsObject.get("ecsevent").get("errorMessage").asText();
         String roundId = ecsObject.get("ecsevent").get("roundId").asText();
+
         return new CoverageProcessingFailedECSEvent(
-                failedECSEvent.getEventJson(),
+                eventJson,
+                participantId,
                 roundId,
-                failedECSEvent.getParticipantId(),
-                failedECSEvent.getErrorMessage()
+                errorMessage
         );
     }
 
@@ -41,8 +44,8 @@ public class CoverageProcessingFailedECSEvent extends FailedECSEvent {
     public String toString() {
         return "CoverageProcessingFailedECSEvent{" +
                 "eventJson='" + eventJson + '\'' +
-                ", roundId='" + roundId + '\'' +
                 ", participantId='" + participantId + '\'' +
+                ", roundId='" + roundId + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
                 '}';
     }

@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.yaml.snakeyaml.Yaml;
-import tdl.datapoint.infra_events.support.FailedECSEvent;
 import tdl.datapoint.infra_events.support.CoverageProcessingFailedECSEvent;
 import tdl.datapoint.infra_events.support.LocalSQSQueue;
 import tdl.datapoint.infra_events.support.SNSEvent;
@@ -103,10 +102,10 @@ public class CoverageFailedEventsAcceptanceTest {
         String errorMessage = "";
 
         // When - Coverage processing fails in the container on the ECS
-        FailedECSEvent ecsEvent = new CoverageProcessingFailedECSEvent(
+        CoverageProcessingFailedECSEvent ecsEvent = new CoverageProcessingFailedECSEvent(
                 ECS_COVERAGE_FAILED_EVENT,
-                roundId,
                 participantId,
+                roundId,
                 errorMessage
         );
         eventsAlertHandler.handleRequest(
@@ -131,10 +130,10 @@ public class CoverageFailedEventsAcceptanceTest {
         String errorMessage = "";
 
         // When - Some unsupported event happens, let's say it's an unsupported ECS event in this case
-        FailedECSEvent unsupportedECSEvent = new CoverageProcessingFailedECSEvent(
+        CoverageProcessingFailedECSEvent unsupportedECSEvent = new CoverageProcessingFailedECSEvent(
                 UNSUPPORTED_ECS_EVENT,
-                roundId,
                 participantId,
+                roundId,
                 errorMessage
         );
         try {
@@ -150,7 +149,7 @@ public class CoverageFailedEventsAcceptanceTest {
         }
     }
 
-    private String wrapAsSNSEvent(FailedECSEvent ecsEvent) throws JsonProcessingException {
+    private String wrapAsSNSEvent(CoverageProcessingFailedECSEvent ecsEvent) throws JsonProcessingException {
         SNSEvent snsEvent = new SNSEvent(mapper.writeValueAsString(ecsEvent.asJsonNode()));
         return mapper.writeValueAsString(snsEvent.asJsonNode());
     }

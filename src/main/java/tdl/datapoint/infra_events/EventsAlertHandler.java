@@ -120,8 +120,8 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
 
     private void handleS3Event(S3BucketEvent event) throws Exception {
         LOG.info("Process S3 event with: " + event);
-        String challengeId = event.getChallengeId();
         String participantId = event.getParticipantId();
+        String challengeId = event.getChallengeId();
 
         participantEventQueue.send(new RecorderStartedEvent(System.currentTimeMillis(),
                         participantId, challengeId));
@@ -129,8 +129,8 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
 
     private void handleECSVideoEvent(VideoProcessingFailedECSEvent event) throws Exception {
         LOG.info("Process ECS Video Processing Failure event with: " + event);
-        String challengeId = event.getChallengeId();
         String participantId = event.getParticipantId();
+        String challengeId = event.getChallengeId();
         String errorMessage = event.getErrorMessage();
 
         participantEventQueue.send(new VideoProcessingFailedEvent(System.currentTimeMillis(),
@@ -139,8 +139,8 @@ public class EventsAlertHandler implements RequestHandler<Map<String, Object>, S
 
     private void handleECSCoverageEvent(CoverageProcessingFailedECSEvent event) throws Exception {
         LOG.info("Process ECS Coverage Processing Failure event with: " + event);
-        String roundId = event.getRoundId();
         String participantId = event.getParticipantId();
+        String roundId = event.getRoundId();
         String errorMessage = event.getErrorMessage();
 
         participantEventQueue.send(new CoverageProcessingFailedEvent(System.currentTimeMillis(),

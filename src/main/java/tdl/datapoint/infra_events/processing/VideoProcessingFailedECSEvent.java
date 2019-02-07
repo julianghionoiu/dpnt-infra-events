@@ -11,8 +11,8 @@ public class VideoProcessingFailedECSEvent extends FailedECSEvent {
     private final String challengeId;
 
     private VideoProcessingFailedECSEvent(String eventJson,
-                                          String challengeId,
                                           String participantId,
+                                          String challengeId,
                                           String errorMessage) {
         super(eventJson, participantId, errorMessage);
         this.challengeId = challengeId;
@@ -21,16 +21,19 @@ public class VideoProcessingFailedECSEvent extends FailedECSEvent {
     @SuppressWarnings("unchecked")
     public static VideoProcessingFailedECSEvent from(Map<String, Object> request,
                                                      ObjectMapper jsonObjectMapper) throws IOException {
-        FailedECSEvent failedECSEvent = FailedECSEvent.from(request, jsonObjectMapper);
         JsonNode ecsObject = getRecordsNode(request, jsonObjectMapper);
-        String challengeId = ecsObject.get("ecsevent").get("challengeId").asText();
-        return new VideoProcessingFailedECSEvent(
-                failedECSEvent.getEventJson(),
-                challengeId,
-                failedECSEvent.getParticipantId(),
-                failedECSEvent.getErrorMessage()
-        );
 
+        String eventJson = ecsObject.get("ecsevent").get("eventJson").asText();
+        String participantId = ecsObject.get("ecsevent").get("participantId").asText();
+        String errorMessage = ecsObject.get("ecsevent").get("errorMessage").asText();
+        String challengeId = ecsObject.get("ecsevent").get("challengeId").asText();
+
+        return new VideoProcessingFailedECSEvent(
+                eventJson,
+                participantId,
+                challengeId,
+                errorMessage
+        );
     }
 
     public String getChallengeId() {
@@ -41,8 +44,8 @@ public class VideoProcessingFailedECSEvent extends FailedECSEvent {
     public String toString() {
         return "VideoProcessingFailedECSEvent{" +
                 "eventJson='" + eventJson + '\'' +
-                ", challengeId='" + challengeId + '\'' +
                 ", participantId='" + participantId + '\'' +
+                ", challengeId='" + challengeId + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
                 '}';
     }
