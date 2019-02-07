@@ -47,6 +47,6 @@ package:
   artifact: build/libs/dpnt-infra-events-all.jar
 
 functions:
-  srcs-github-export:
-    handler: tdl.datapoint.sourcecode.SourceCodeUploadHandler
+  recorder-started:
+    handler: tdl.datapoint.infra_events.EventsAlertHandler
     onError: arn:aws:sns:eu-west-2:577770582757:MyselfEU2

@@ -8,13 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 public class S3BucketEvent {
-    private String bucket;
 
-    private String key;
+    private final String eventJson;
+    private final String challengeId;
+    private final String participantId;
 
-    private S3BucketEvent(String bucket, String key) {
-        this.bucket = bucket;
-        this.key = key;
+    private S3BucketEvent(String eventJson, String challengeId, String participantId) {
+        this.eventJson = eventJson;
+        this.challengeId = challengeId;
+        this.participantId = participantId;
     }
 
     @SuppressWarnings("unchecked")
@@ -32,9 +34,10 @@ public class S3BucketEvent {
         JsonNode s3EventTree = jsonObjectMapper.readTree(jsonS3Payload);
         JsonNode s3Object = s3EventTree.get("Records").get(0).get("s3");
 
-        String bucket = s3Object.get("bucket").get("name").asText();
-        String key = s3Object.get("object").get("key").asText();
-        return new S3BucketEvent(bucket, key);
+        String eventJson = s3Object.get("s3event").get("eventJson").asText();
+        String challengeId = s3Object.get("s3event").get("challengeId").asText();
+        String participantId = s3Object.get("s3event").get("participantId").asText();
+        return new S3BucketEvent(eventJson, challengeId, participantId);
     }
 
     private static Object mapGet(Map<String, Object> map, String key) {
@@ -49,27 +52,20 @@ public class S3BucketEvent {
         return o;
     }
 
-    public String getBucket() {
-        return bucket;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
     public String getChallengeId() {
-        return key.split("/")[0];
+        return challengeId;
     }
 
     public String getParticipantId() {
-        return key.split("/")[1];
+        return participantId;
     }
 
     @Override
     public String toString() {
         return "S3BucketEvent{" +
-                "bucket='" + bucket + '\'' +
-                ", key='" + key + '\'' +
+                "eventJson='" + eventJson + '\'' +
+                ", challengeId='" + challengeId + '\'' +
+                ", participantId='" + participantId + '\'' +
                 '}';
     }
 }

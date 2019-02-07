@@ -18,6 +18,7 @@ repositories {
     maven {
         url "https://dl.bintray.com/julianghionoiu/maven"
     }
+    mavenLocal()
 }
 
 sourceCompatibility = 1.8
@@ -29,8 +30,8 @@ dependencies {
             'com.amazonaws:aws-lambda-java-log4j:1.0.0',
             'com.amazonaws:aws-java-sdk-s3:1.11.254',
 
-            'ro.ghionoiu:queue-client:0.1.17',
-            
+            'ro.ghionoiu:queue-client:0.1.22',
+
             'com.fasterxml.jackson.core:jackson-core:2.8.5',
             'com.fasterxml.jackson.core:jackson-databind:2.8.5',
             'com.fasterxml.jackson.core:jackson-annotations:2.8.5',
@@ -38,6 +39,15 @@ dependencies {
             'commons-io:commons-io:2.5',
     )
 
+    compile ('ro.ghionoiu:dev-screen-record:0.0.8') {
+        exclude group: 'com.beust', module: 'jcommander'
+        exclude group: 'org.apache.httpcomponents'
+    }
+
+    testCompile ('ro.ghionoiu:dev-screen-record:0.0.8') {
+        exclude group: 'com.beust', module: 'jcommander'
+        exclude group: 'org.apache.httpcomponents'
+    }
 
     testCompile('junit:junit:4.12') {
         exclude module: 'hamcrest-core'

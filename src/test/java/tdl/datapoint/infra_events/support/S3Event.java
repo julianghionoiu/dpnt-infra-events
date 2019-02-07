@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class S3Event {
-    private final String bucket;
-    private final String key;
+    private final String eventJson;
+    private final String challengeId;
+    private final String participantId;
 
-    S3Event(String bucket, String key) {
-        this.bucket = bucket;
-        this.key = key;
+    public S3Event(String eventJson, String challengeId, String participantId) {
+        this.eventJson = eventJson;
+        this.challengeId = challengeId;
+        this.participantId = participantId;
     }
 
     public ObjectNode asJsonNode() {
@@ -17,8 +19,10 @@ public class S3Event {
 
         ObjectNode rootNode = factory.objectNode();
         ObjectNode s3 = rootNode.putArray("Records").addObject().putObject("s3");
-        s3.putObject("bucket").put("name", bucket);
-        s3.putObject("object").put("key", key);
+        s3.putObject("s3event")
+                .put("eventJson", eventJson)
+                .put("challengeId", challengeId)
+                .put("participantId", participantId);
         return rootNode;
     }
 }
